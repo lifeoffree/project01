@@ -3,57 +3,36 @@ package net.bitacademy.java72.control.json2;
 import java.util.HashMap;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import net.bitacademy.java72.domain.Member;
-import net.bitacademy.java72.service.MemberService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 
+import net.bitacademy.java72.domain.Member;
+import net.bitacademy.java72.service.MemberService;
+
 @Controller
 @RequestMapping("/json2/auth")
 public class AuthController {
   @Autowired MemberService memberService;
   
-  @RequestMapping(value="/login",  method=RequestMethod.GET)
+  @RequestMapping(value="/login", method=RequestMethod.POST)
   @ResponseBody
-  public String form(
-      @CookieValue(required=false) String email,
-      HttpServletRequest request, 
-      HttpSession session,
-      Model model) throws Exception {
-
-    String refererUrl = request.getHeader("Referer");
-    if (refererUrl != null) {
-      session.setAttribute("refererUrl", refererUrl);
-    }
-
-    if (email != null) {
-      model.addAttribute("email", email);
-    }
-    
-    return "auth/LoginForm";
-  }
-  
-  @RequestMapping(value="/login", 
-      method=RequestMethod.POST)
   public String login(
       String email, 
       String password,
       String saveEmail,
       HttpServletResponse response,
       HttpSession session) throws Exception {
-
+    HashMap<String,Object> resultMap = 
+        new HashMap<String,Object>();
+    
     if (saveEmail != null) {
       Cookie cookie = new Cookie("email", email);
       cookie.setMaxAge(60 * 60 * 24);
@@ -70,23 +49,33 @@ public class AuthController {
     if (member == null) {
       session.invalidate();
       resultMap.put("result", "failure");
-      return "auth/LoginFail";
     } else {
       session.setAttribute("member", member);
-
       String refererUrl = 
           (String)session.getAttribute("refererUrl");
       if (refererUrl != null) {
-        return "redirect:../board/list.do";
-      } else {
-        return "redirect:" + refererUrl;
+        resultMap.put("refererUrl", refererUrl);
       }
+      resultMap.put("result", "success");
     }
+    return new Gson().toJson(resultMap);
   }
   
   @RequestMapping("/logout.do")
+  @ResponseBody
   public String logout(HttpSession session) {
+    HashMap<String,Object> resultMap = 
+        new HashMap<String,Object>();
     session.invalidate(); 
-    return "redirect:login.do";
+    resultMap.put("result", "success");
+    
+    // Gson 라이브러리를 사용하여  JSON 문자열 생성한다.
+    return new Gson().toJson(resultMap);
   }
 }
+
+
+
+
+
+
