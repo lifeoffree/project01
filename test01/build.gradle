@@ -1,0 +1,53 @@
+// apply plugin: 'eclipse' // eclipse-wtp에 포함된다
+apply plugin: 'java'
+// 웹 어플레이션에 의한 명령어
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+
+
+// 소스 파일의 문자 집합과 자바 버전을 지정한다.
+// 문자 집합을 지정하지 않으면, 윈도OS는 MS-949로 간주한다.
+compileJava {
+  options.encoding = 'UTF-8' // 소스 파일의 문자 집합 (유니코드 변형 8비트로 무조건 표현)
+  // 컴파일 할 때 지정된 버전의 문법으로 제한한다. 
+  sourceCompatibility = 1.8 
+}
+eclipse {
+        wtp {
+        facet   {
+        facet name : 'jst.web', version: '3.1'
+        facet name : 'jst.java', version: '1.8'
+                }
+        }
+}
+// 의존 라이브러리를 다운로드 받을 서버를 설정 
+repositories {
+  mavenCentral() // https://repo1.maven.org/maven2/
+}
+
+// 가져올 라이브러리를 지정한다.
+// 라이브러리 검색: www.mvnrepository.com
+dependencies {
+  compile 'mysql:mysql-connector-java:5.1.36'
+  compile 'org.mybatis:mybatis:3.3.0'
+  compile 'org.reflections:reflections:0.9.10'
+  compile 'org.mybatis:mybatis-spring:1.2.3'
+  compile 'org.springframework:spring-jdbc:4.2.0.RELEASE'
+  compile 'commons-fileupload:commons-fileupload:1.3.1'
+  compile 'javax.servlet:jstl:1.2'
+  compile 'org.springframework:spring-webmvc:4.2.0.RELEASE'
+  compile 'org.aspectj:aspectjweaver:1.8.6'
+  compile 'com.google.code.gson:gson:2.3.1' 
+  
+  //메이븐 apache commons fileupload
+  compile 'commons-fileupload:commons-fileupload:1.3.1'
+  
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.6.1'
+  
+  
+  testCompile group: 'junit', name: 'junit', version: '4.+'
+  // 컴파일 할 때만 사용하고 배포에는 제외하라
+  // -> 톰캣 서버에 배치할 때 복사하지 않는다
+  providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+  
+}
